@@ -109,6 +109,9 @@ void Database_write(struct Connection *conn)
 
 void Database_create(struct Connection *conn)
 {
+  // NOTE
+  // When we create a new database we're going
+  // ahead and creating MAX_ROWS of data.
   for (size_t i = 0; i < MAX_ROWS; i++) {
     struct Address addr = {.id = i, .set = 0};
     conn->db->rows[i] = addr;
@@ -117,13 +120,18 @@ void Database_create(struct Connection *conn)
 
 void Database_set(struct Connection *conn, int id, const char *name, const char *email)
 {
+  if (strlen(name) > MAX_DATA || strlen(email) > MAX_DATA) {
+    die(conn, "Name or email is too long.");
+  }
+
   // Get the location in memory of the address
   struct Address *addr = &conn->db->rows[id];
   if (addr->set) die(conn, "Already set. Delete it first.");
 
   addr->set = 1;
 
-  // WARNING: bug, read the "How To Break It" and fix this
+  // WARNING: bug, read the "How To Break It" and fix this.
+  // SOLUTION: force last character to `\0`
   char *res = strncpy(addr->name, name, MAX_DATA);
 
   // demonstrate the strncpy bug
@@ -147,7 +155,12 @@ void Database_get(struct Connection *conn, int id)
 
 void Database_delete(struct Connection *conn, int id)
 {
+  // STEP 1: Create a struct prototype, initializing
+  // the `id` and `set` fields.
   struct Address addr = {.id = id, .set = 0};
+
+  // STEP 2: Copy the struct prototype into the rows
+  // array by assigning it the element with `id`.
   conn->db->rows[id] = addr;
 }
 
@@ -222,4 +235,5 @@ int main(int argc, char *argv[]) {
 // $ ./ex17 db.dat s 1 zed zed@zedshaw.com
 // $ ./ex17 db.dat s 2 frank frank@zedshaw.com
 // $ ./ex17 db.dat s 3 joe joe@zedshaw.com
+// $ ./ex17 db.dat s 4 zed zed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.comzed@zedshaw.com
 // $ ./ex17 db.dat g 1
