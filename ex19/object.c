@@ -6,16 +6,23 @@
 
 void Object_destroy(void *self)
 {
+  assert(self != NULL);
+
   Object *obj = self;
 
   if (obj) {
-    if (obj->description) free(obj->description);
+    printf("[%s] ", __func__);
+    if (obj->description) {
+      printf("%s\n", obj->description);
+      free(obj->description);
+    }
     free(obj);
   }
 }
 
 void Object_describe(void *self)
 {
+  assert(self != NULL);
   Object *obj = self;
   printf("%s.\n", obj->description);
 }
@@ -23,23 +30,33 @@ void Object_describe(void *self)
 int Object_init(void *self)
 {
   // do nothing really
+  assert(self != NULL);
   return 1;
 }
 
 void *Object_move(void *self, Direction direction)
 {
+  assert(self != NULL);
+  assert(direction >= 0 && direction <= 3);
+
   printf("You can't go in that direction!\n");
+
   return NULL;
 }
 
 int Object_attack(void *self, int damage)
 {
+  assert(self != NULL);
   printf("You can't attack that!\n");
   return 0;
 }
 
 void *Object_new(size_t size, Object proto, char *description)
 {
+  assert(description != NULL);
+
+  printf("NEW() -> %s\n", description);
+
   // setup the default functions in case they aren't set
   if (!proto.init)     proto.init     = Object_init;
   if (!proto.describe) proto.describe = Object_describe;
@@ -80,6 +97,8 @@ void *Object_new(size_t size, Object proto, char *description)
   //    these out for whatever ones they want.
   Object *el = calloc(1, size);
   *el = proto;
+
+  assert(el != NULL);
 
   // copy the description over
   el->description = strdup(description);
